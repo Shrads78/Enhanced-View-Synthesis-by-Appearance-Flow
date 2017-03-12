@@ -6,7 +6,7 @@ import random
 import itertools
 from keras.utils.np_utils import *
 
-data_folder_chair = "./chairs/"
+data_folder_chair = "../data/chairs/"
 
 def read_image(filename, target_size):
 	img = image.load_img(filename, target_size = target_size)
@@ -89,5 +89,5 @@ def read_data_autoencoder(target_size, test_split_ratio):
 
 if __name__ == '__main__':
 	train, test = read_data_autoencoder((224, 224), 0.2)
-	np.save('train_images_autoencoder.npy', train)
-	np.save('test_images_autoencoder.npy', test)
+	np.save('../data/train_images_autoencoder.npy', train)
+	np.save('../data/test_images_autoencoder.npy', test)

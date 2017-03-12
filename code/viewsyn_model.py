@@ -4,6 +4,7 @@ from keras.layers import *
 from keras.models import Sequential, Model
 from keras.optimizers import *
 from keras.callbacks import *
+import utility as util
 import pdb
 
 def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 = 0.999, mom = 0.5, rh = 0.9):
@@ -90,5 +91,11 @@ def train_autoencoder(autoencoder, input_data):
 	print hist.history
 	return hist
 
+def test_autoencoder(autoencoder, test_data):
+	
+	test_image = test_data[1:2,]
+	output = autoencoder.predict(test_image)
+	
+	util.show_image(output)
 
-
+	

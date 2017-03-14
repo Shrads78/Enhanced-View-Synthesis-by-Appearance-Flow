@@ -5,6 +5,7 @@ import numpy as np
 import Image
 import os
 import pdb
+import shutil 
 
 def save_as_image(images):
 	for i in range(0, len(images)):

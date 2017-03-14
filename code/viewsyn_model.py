@@ -70,23 +70,21 @@ def build_autoencoder():
 	opt = get_optimizer('adam')
 	model.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
 
-
 	print model.summary()
 	return model
 
 
-def train_autoencoder(autoencoder, input_data):
-	X = input_data
-	Y = input_data
-
+def train_autoencoder(autoencoder):
+	
 	#Callbacks
 	hist = History()
 	checkpoint = ModelCheckpoint('../model/weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='auto', period=5)
 	callbacks_list = [hist, checkpoint]
 
+	dataArr = util.generate_data_array_for_autoencoder(dataPath='../data/chairs/')	
 	
-	history = autoencoder.fit(X, Y, batch_size=64, nb_epoch=100, verbose=1, callbacks=callbacks_list,
-		validation_split=0.2, validation_data=None, shuffle=True, class_weight=None, sample_weight=None, initial_epoch=0)
+	history = autoencoder.fit_generator(util.generate_autoencoder_data_from_list(dataArr), samples_per_epoch=64, nb_epoch=100, verbose=1, callbacks=callbacks_list,
+		 validation_data=None, class_weight=None, initial_epoch=0)	
 
 	print hist.history
 	return hist

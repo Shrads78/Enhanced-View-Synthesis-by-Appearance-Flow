@@ -6,6 +6,7 @@ from keras.optimizers import *
 from keras.callbacks import *
 import utility as util
 import pdb
+import math
 
 def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 = 0.999, mom = 0.5, rh = 0.9):
 	eps = 1e-8
@@ -86,8 +87,8 @@ def train_autoencoder(autoencoder):
 	#for d in util.generate_autoencoder_data_from_list(dataArr):
 	#	pdb.set_trace()
 
-	history = autoencoder.fit_generator(util.generate_autoencoder_data_from_list(dataArr), samples_per_epoch=1, nb_epoch=100, verbose=1, callbacks=callbacks_list,
-		 validation_data=None, class_weight=None, initial_epoch=0)	
+	history = autoencoder.fit_generator(util.generate_autoencoder_data_from_list(dataArr[:int(math.ceil(.8*len(dataArr)))]), samples_per_epoch=64, nb_epoch=100, verbose=1, callbacks=callbacks_list,
+		 validation_data=util.generate_autoencoder_data_from_list(dataArr[int(math.ceil(.8*len(dataArr))):]), nb_val_samples=16, class_weight=None, initial_epoch=0)	
 
 	print hist.history
 	return hist

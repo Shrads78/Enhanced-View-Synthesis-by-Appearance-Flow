@@ -4,6 +4,7 @@ import matplotlib.image as mpimg
 import numpy as np
 import Image
 import os
+import pdb
 
 def save_as_image(images):
 	for i in range(0, len(images)):
@@ -22,9 +23,13 @@ def generate_autoencoder_data_from_list(dataArr):
 	while 1:
 		for fp in dataArr:	
 			currImgPath = fp[0]
-			img = Image.open(currImgPath)
+			img = np.asarray(Image.open(currImgPath).convert('RGB'), dtype=np.uint8)
 			#msk = imgMaskGen(currImgPath)
-			yield ({'image': img}, {'output': img})
+			img4 = []
+			img4.append(img)
+			img4 = np.asarray(img4)
+			yield ({'convolution2d_input_1': img4}, {'reshape_3': img4})
+			#yield (img,img)
 
 def generate_data_array_for_autoencoder(dataPath='../data/chairs/'):
 	dataArr = []
@@ -45,9 +50,11 @@ def generate_data_array_for_autoencoder(dataPath='../data/chairs/'):
 						for f in fList:
 							if '.png' in f:
 								readLoc = inpath + '/'+f
+								#print readLoc
 								dataArr.append([readLoc])
 
 	dataArr = np.asarray(dataArr)
+	#pdb.set_trace()
 	np.random.shuffle(dataArr)
 	return dataArr
 

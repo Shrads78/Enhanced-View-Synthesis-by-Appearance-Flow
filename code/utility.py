@@ -27,19 +27,19 @@ def get_azimuth_transformation(in_path, out_path):
 
 	in_azimuth = int(in_f.split('_')[0]) / 20
 	out_azimuth = int(out_f.split('_')[0]) / 20
-	azimuth_bin = (in_azimuth - out_azimuth) #% 19
+	azimuth_bin = (in_azimuth - out_azimuth) % 19
 	
-	# azimuth_onehot = np.zeros((1,19))
-	# azimuth_onehot[0][azimuth_bin] = 1
+	azimuth_onehot = np.zeros((1,19))
+	azimuth_onehot[0][azimuth_bin] = 1
 	
-	return azimuth_bin
+	return azimuth_onehot
 
 def generate_data_from_list(data_dict, batch_size):
 	while 1:
 		in_imgb = []
 		out_imgb = []
 		mskb = []
-		#view_transformationb = []
+		view_transformationb = []
 		i=0
 
 		while i < batch_size:
@@ -55,10 +55,9 @@ def generate_data_from_list(data_dict, batch_size):
 			
 			view_transformation = get_azimuth_transformation(in_img_path, out_img_path)
 
-			if view_transformation > 5:
+			if np.argmax(view_transformation) > 9:
 				continue
 
-			#print "here", view_transformation
 			in_img = np.asarray(Image.open(in_img_path).convert('RGB'), dtype=np.uint8)
 			out_img = np.asarray(Image.open(out_img_path).convert('RGB'), dtype=np.uint8)
 			
@@ -67,12 +66,12 @@ def generate_data_from_list(data_dict, batch_size):
 			in_imgb.append(in_img)
 			out_imgb.append(out_img)
 			mskb.append(msk)
-			#view_transformationb.append(view_transformation[0])
+			view_transformationb.append(view_transformation[0])
 
 			i += 1
 			
 		#pdb.set_trace()
-		yield ({'convolution2d_input_1': np.asarray(in_imgb)}, 
+		yield ({'image_input': np.asarray(in_imgb), 'view_input':np.asarray(view_transformationb)}, 
 			{'reshape_3': np.asarray(out_imgb)})
 		
 

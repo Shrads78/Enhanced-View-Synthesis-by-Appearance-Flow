@@ -20,34 +20,55 @@ def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 =
 
 	return optimizers[name]
 
-def build_autoencoder():
-	#define network architecture for encoder
-	model = Sequential()
-
-	#6 convoltuion layers
-	model.add(Convolution2D(16, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu',
-			input_shape=(224, 224, 3)))
-	model.add(Convolution2D(32, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
-	model.add(Convolution2D(64, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
-	model.add(Convolution2D(128, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
-	model.add(Convolution2D(256, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
-	model.add(Convolution2D(512, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
-
-	#Flatten 
-	model.add(Flatten())
+def build_viewpoint_encoder():
+	#define network architecture for viewpoint transformation encoder
+	model =  Sequential()
 
 	#2 fully connected layers
-	model.add(Dense(4096, activation='relu'))
-	model.add(Dropout(p=0))
-	model.add(Dense(4096, activation='relu'))
-	model.add(Dropout(p=0))
+	model.add(Dense(128, input_dim=19, activation='relu'))
+	model.add(Dense(256, activation='relu'))
 
+	return model
+
+def build_autoencoder():
+	image_input = Input(shape=(224, 224, 3,), name='image_input')
+	view_input = Input(shape=(19,), name='view_input')
+
+	#define network architecture for encoder
+	image_encoder = Sequential()
+
+	#6 convoltuion layers
+	image_encoder.add(Convolution2D(16, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu',
+			input_shape=(224, 224, 3)))
+	image_encoder.add(Convolution2D(32, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	image_encoder.add(Convolution2D(64, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	image_encoder.add(Convolution2D(128, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	image_encoder.add(Convolution2D(256, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	image_encoder.add(Convolution2D(512, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+
+	#Flatten 
+	image_encoder.add(Flatten())
+
+	#2 fully connected layers
+	image_encoder.add(Dense(4096, activation='relu'))
+	image_encoder.add(Dropout(p=0))
+	image_encoder.add(Dense(4096, activation='relu'))
+	image_encoder.add(Dropout(p=0))
+
+	#view encoder 
+	view_encoder = build_viewpoint_encoder()
+
+	image_output = image_encoder(image_input)
+	view_output = view_encoder(view_input)
+
+	image_view_out = merge([image_output, view_output], mode='concat', concat_axis=1)
 	
 	#define network architecture for decoder
 	
 	#2 fully connected layers
-	model.add(Dense(4096, activation='relu'))
-	model.add(Dense(4096, activation='relu'))
+	model = Sequential()
+	model.add(Dense(4096, input_dim=4352, activation='relu'))
+	#model.add(Dense(4096, activation='relu'))
 	
 	#reshape to 2D
 	model.add(Reshape((8, 8, 64)))
@@ -67,12 +88,15 @@ def build_autoencoder():
 	model.add(Lambda(lambda x: x[:,:50176,])) # throw away some
 	model.add(Reshape((224,224,3)))
 
+	main_output = model(image_view_out)
+
+	encoder_decoder = Model(input=[image_input, view_input], output=main_output)
 	#compile model
 	opt = get_optimizer('adam')
-	model.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
+	encoder_decoder.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
 
-	print model.summary()
-	return model
+	print encoder_decoder.summary()
+	return encoder_decoder
 
 
 def train_autoencoder(autoencoder):

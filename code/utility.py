@@ -72,7 +72,7 @@ def generate_data_from_list(data_dict, batch_size):
 			
 		#pdb.set_trace()
 		yield ({'image_input': np.asarray(in_imgb), 'view_input':np.asarray(view_transformationb)}, 
-			{'reshape_3': np.asarray(out_imgb)})
+			{'sequential_3': np.asarray(out_imgb)})
 		
 
 def generate_data_dictionary(dataPath='../data/train/'):

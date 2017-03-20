@@ -111,7 +111,7 @@ def train_autoencoder(autoencoder):
 	#for d in util.generate_autoencoder_data_from_list(dataArr):
 	#	pdb.set_trace()
 
-	history = autoencoder.fit_generator(util.generate_data_from_list(train_dict, 128), samples_per_epoch=280000, nb_epoch=100, verbose=1, callbacks=callbacks_list,
+	history = autoencoder.fit_generator(util.generate_data_from_list(train_dict, 128), samples_per_epoch=281344, nb_epoch=300, verbose=1, callbacks=callbacks_list,
 		 validation_data=util.generate_data_from_list(val_dict, 128*0.2), nb_val_samples=280000*0.2, class_weight=None, initial_epoch=0)	
 
 	print hist.history

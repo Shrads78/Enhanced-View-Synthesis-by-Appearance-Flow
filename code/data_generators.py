@@ -141,7 +141,7 @@ def generate_data_replication(data_dict, batch_size, first_output_name='bilinear
 			mskb.append(msk)
 			view_transformationb.append(view_transformation[0])
 			
-		
+		# print np.asarray(in_imgb).shape, np.asarray(out_imgb).shape
 		yield ({'image_input': np.asarray(in_imgb), 'view_input': np.asarray(view_transformationb)}, 
 			{first_output_name: np.asarray(out_imgb), 'sequential_4': np.asarray(mskb)})
 

@@ -9,7 +9,7 @@ def train_network(network, f_generate_list, f_generate_data):
 	#Callbacks
 	hist = History()
 	checkpoint = ModelCheckpoint('../model/weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='auto', period=5)
-	callbacks_list = [hist, checkpoint]
+	callbacks_list = [hist, checkpoint, tensor_callback]
 
 	
 	train_data_dict, val_data_dict = f_generate_list(dataPath = "../data/train/")
@@ -18,7 +18,7 @@ def train_network(network, f_generate_list, f_generate_data):
 	s_epoch = const.samples_per_epoch
 
 	history = network.fit_generator(f_generate_data(train_data_dict, b_size), samples_per_epoch=s_epoch, nb_epoch=100, verbose=1, callbacks=callbacks_list,
-		 validation_data=f_generate_data(val_data_dict, b_size*0.2), nb_val_samples=s_epoch*0.2, class_weight=None, initial_epoch=0)
+				validation_data=f_generate_data(val_data_dict, int(b_size*0.2)), nb_val_samples=int(s_epoch*0.2), class_weight=None, initial_epoch=0)
 
 	print hist.history
 	return hist

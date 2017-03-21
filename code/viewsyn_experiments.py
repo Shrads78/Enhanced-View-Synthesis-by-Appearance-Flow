@@ -91,6 +91,6 @@ if __name__ == '__main__':
 	test_images = load_test_data()
 
 	# run_autoencoder(test_images)
-	#run_transformed_autoencoder(test_images)
-	run_replication(test_images)
-	# run_five_channel_network(test_images)
+	# run_transformed_autoencoder(test_images)
+	# run_replication(test_images)
+	run_five_channel_network(test_images)

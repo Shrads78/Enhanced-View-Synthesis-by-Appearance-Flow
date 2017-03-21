@@ -2,6 +2,7 @@ from keras.preprocessing import image
 from keras.models import Sequential, Model
 from keras.layers import *
 from bilinear_layer import Bilinear
+from keras.callbacks import *
 import numpy as np
 import utility as util
 import h5py, pdb, os
@@ -92,14 +93,16 @@ def test_load_weights():
 def test_bilinear_layer():
 	model = Sequential()
 	model.add(Bilinear(input_shape=(224, 224, 5)))
-
+	tensor_callback = TensorBoard(log_dir='../logs/', histogram_freq=1, write_graph=True, write_images=True)
 	print model.summary()
 
 	current_chair_folder = "../data/debug_input/"
 	test_data = load_data_bilinear(current_chair_folder)
+	model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['accuracy'])
+	model.fit(test_data, test_data[:,:,:,:-2], batch_size=1, nb_epoch=10, verbose=1, callbacks = [tensor_callback])
 	
 	out = model.predict(test_data)
-	pdb.set_trace()
+	# pdb.set_trace()
 	util.save_as_image("../data/debug_output/", out)
 
 def test_transformed_autoencoder():
@@ -120,4 +123,4 @@ if __name__ == '__main__':
 	
 	test_bilinear_layer()
 
-	test_transformed_autoencoder()
+	# test_transformed_autoencoder()

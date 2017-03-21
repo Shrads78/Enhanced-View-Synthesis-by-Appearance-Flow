@@ -9,7 +9,7 @@ def train_network(network, f_generate_list, f_generate_data):
 	#Callbacks
 	hist = History()
 	checkpoint = ModelCheckpoint('../model/weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='auto', period=5)
-	callbacks_list = [hist, checkpoint, tensor_callback]
+	callbacks_list = [hist, checkpoint]
 
 	
 	train_data_dict, val_data_dict = f_generate_list(dataPath = "../data/train/")

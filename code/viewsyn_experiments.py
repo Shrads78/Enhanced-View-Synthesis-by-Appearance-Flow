@@ -17,8 +17,8 @@ def run_autoencoder(test_images):
 	f_generate_list = d_gen.generate_data_list
 	f_generate_data = d_gen.generate_data_autoencoder
 	
+	#train autoencoder
 	try:
-		#train autoencoder
 		hist = train_model.train_network(autoencoder, f_generate_list, f_generate_data)
 	finally:
 		autoencoder.save('../model/weights-interrupt-autoencoder.hdf5')
@@ -34,8 +34,8 @@ def run_transformed_autoencoder(test_images):
 	f_generate_list = d_gen.generate_data_dictionary
 	f_generate_data = d_gen.generate_data_trans_autoencoder
 	
+	#train transformed autoencoder
 	try:
-		#train transformed autoencoder
 		hist = train_model.train_network(t_autoencoder, f_generate_list, f_generate_data)
 	finally:
 		t_autoencoder.save('../model/weights-interrupt-t_autoencoder.hdf5')
@@ -52,8 +52,8 @@ def run_replication(test_images):
 	f_generate_list = d_gen.generate_data_dictionary
 	f_generate_data = d_gen.generate_data_replication
 	
+	#train replication network
 	try:
-		#train replication network
 		hist = train_model.train_network(replication_net, f_generate_list, f_generate_data)
 	finally:
 		replication_net.save('../model/weights-interrupt-replication_net.hdf5')
@@ -72,8 +72,8 @@ def run_five_channel_network(test_images):
 	#load pre trained ../model/weights from autoencoder
 	#train_model.load_autoenocoder_model_../model/weights(five_channel_net, '../model/../model/weights.29-377.08.hdf5')
 	
+	#train five channel network
 	try:
-		#train five channel network
 		hist = train_model.train_network(five_channel_net, f_generate_list, f_generate_data)
 	finally:
 		five_channel_net.save('../model/weights-interrupt-five_channel_net.hdf5')

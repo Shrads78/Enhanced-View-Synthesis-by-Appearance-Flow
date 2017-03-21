@@ -3,13 +3,11 @@ from keras.models import Sequential, Model
 from keras.layers import *
 from bilinear_layer import Bilinear
 import numpy as np
-import tensorflow as tf
 import utility as util
 import h5py, pdb, os
-import viewsyn_model as model
-import viewsyn_fullnetwork as fnetwork
+import viewsyn_architecture as model
 
-def load_test_full(current_chair_folder):
+def load_test_image_view(current_chair_folder):
 	img = []
 	vpt_transformation = []
 	vpt_array = np.zeros((19))
@@ -20,36 +18,31 @@ def load_test_full(current_chair_folder):
 		img.append(np.asarray(im))
 		
 		tmp = vpt_array
-		tmp[9] = 1
+		tmp[2] = 1
 		vpt_transformation += [tmp]
 		cur_idx += 1
 		cur_idx %= 19
 
 	return np.array(img), np.array(vpt_transformation)
 
-def load_test_data(current_chair_folder):
+def load_data_bilinear(current_chair_folder):
 	img = []
-	vpt_transformation = []
-	vpt_array = np.zeros((19))
-	cur_idx = 0
+
 	for filename in os.listdir(current_chair_folder):
 		if filename == ".DS_Store": continue
 		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
 		# pdb.set_trace()
-		dx = np.zeros((224, 224,1))
-		dy = np.zeros((224, 224,1))
+		x = np.zeros((224, 224,1))
+		y = np.zeros((224, 224,1))
 		for i in range(224):
 			for j in range(224):
-				dy[i][j][0] = 50
-		im = np.concatenate((im, dx, dy), axis = 2)
-		img.append(np.asarray(im))
-		tmp = vpt_array
-		tmp[cur_idx] = 1
-		vpt_transformation += [tmp]
-		cur_idx += 1
-		cur_idx %= 19
+				x[i][j][0] = j * 1.2
+				y[i][j][0] = i * 1.2
 
-	return np.array(img), np.array(vpt_transformation)
+		im = np.concatenate((im, y, x), axis = 2)
+		img.append(np.asarray(im))
+		
+	return np.array(img)
 
 def test_load_weights():
 	weights_path = '../model/weights.29-0.95.hdf5'
@@ -103,28 +96,28 @@ def test_bilinear_layer():
 	print model.summary()
 
 	current_chair_folder = "../data/debug_input/"
-	test_data, _ = load_test_data(current_chair_folder)
+	test_data = load_data_bilinear(current_chair_folder)
 	
 	out = model.predict(test_data)
 	pdb.set_trace()
 	util.save_as_image("../data/debug_output/", out)
 
-def test_full_network():
-	weights_path = '../model/weights.14-393.85.hdf5'
+def test_transformed_autoencoder():
+	weights_path = '../model/weights.39-376.69.hdf5'
 	
-	full_network = model.build_autoencoder()
-	full_network.load_weights(weights_path)
+	t_autoencoder = model.build_transformed_autoencoder()
+	t_autoencoder.load_weights(weights_path)
 
 	current_chair_folder = "../data/test/input/"
-	test_data, vpt_transformation = load_test_full(current_chair_folder)
+	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
 	# pdb.set_trace()
-	out = full_network.predict([test_data, vpt_transformation])
+	out = t_autoencoder.predict([test_data, vpt_transformation])
 	util.save_as_image("../data/test/", out)
 
 
 
 if __name__ == '__main__':
-	# Remember to set batch_size accordingly.
-	#test_bilinear_layer()
-	# test_load_weights()
-	test_full_network()
+	
+	test_bilinear_layer()
+
+	test_transformed_autoencoder()

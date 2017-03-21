@@ -62,6 +62,8 @@ def build_common_decoder(input_dim=4352):
 
 	#1 fully connected layers
 	model.add(Dense(4096, input_dim=input_dim, activation='relu')) #4096+256
+	#This layer is extra, keeping it here for backward compatibility
+	model.add(Dense(4096, activation='relu')) 
 	
 	#reshape to 2D
 	model.add(Reshape((8, 8, 64)))

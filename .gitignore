@@ -1,6 +1,9 @@
 *.pyc
 .DS_Store
 *.zip
-/data/*
+*.gz
+./data/*
 *.swp
-nohup.out
+*.out
+*.pem
+*.hdf5

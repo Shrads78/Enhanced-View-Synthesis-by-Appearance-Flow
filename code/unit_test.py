@@ -118,9 +118,22 @@ def test_transformed_autoencoder():
 	util.save_as_image("../data/test/", out)
 
 
+def test_replication():
+	weights_path = '../model/weights.39-376.69.hdf5'
+	
+	replication_net = model.build_replication_network()
+	replication_net.load_weights(weights_path)
+
+	current_chair_folder = "../data/test/input/"
+	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
+	# pdb.set_trace()
+	out = replication_net.predict([test_data, vpt_transformation])
+	util.save_as_image("../data/test/", out)
+
 
 if __name__ == '__main__':
 	
-	test_bilinear_layer()
+	#test_bilinear_layer()
 
 	# test_transformed_autoencoder()
+	test_replication()

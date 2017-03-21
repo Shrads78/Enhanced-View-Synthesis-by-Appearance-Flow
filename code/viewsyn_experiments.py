@@ -51,7 +51,8 @@ def run_replication(test_images):
 	replication_net = model.build_replication_network()
 
 	#plot network
-	util.plot_architecture(replication_net, '../visualize_net/replication.png')
+	util.plot_nested_architecture(replication_net, '../visualize_net/replication/')
+	
 	#data generator list
 	f_generate_list = d_gen.generate_data_dictionary
 	f_generate_data = d_gen.generate_data_replication

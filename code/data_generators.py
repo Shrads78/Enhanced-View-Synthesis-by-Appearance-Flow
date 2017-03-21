@@ -23,6 +23,14 @@ def get_azimuth_transformation(in_path, out_path):
 	
 	return azimuth_onehot
 
+def subtract_mean(img):
+	m1 = 104 * np.ones((224, 224))
+	m2 = 117 * np.ones((224, 224))
+	m3 = 123 * np.ones((224, 224))
+	m_all = np.concatenate((m1[:,:,None], m2[:,:,None], m3[:,:,None]), axis=2)
+	img = img - m_all
+	return img
+
 
 def generate_data_autoencoder(dataArr, batch_size):
 	while 1:
@@ -73,6 +81,10 @@ def generate_data_trans_autoencoder(data_dict, batch_size):
 			in_img = np.asarray(Image.open(in_img_path).convert('RGB'), dtype=np.uint8)
 			out_img = np.asarray(Image.open(out_img_path).convert('RGB'), dtype=np.uint8)
 			
+			#subtract mean
+			in_img = subtract_mean(in_img)
+			out_img = subtract_mean(out_img)
+
 			msk = np.reshape(np.asarray(img_mask_gen(out_img_path)), (224, 224, 1))
 
 			in_imgb.append(in_img)
@@ -109,6 +121,10 @@ def generate_data_replication(data_dict, batch_size, first_output_name='bilinear
 
 			in_img = np.asarray(Image.open(in_img_path).convert('RGB'), dtype=np.uint8)
 			out_img = np.asarray(Image.open(out_img_path).convert('RGB'), dtype=np.uint8)
+			
+			#subtract mean
+			in_img = subtract_mean(in_img)
+			out_img = subtract_mean(out_img)
 			
 			msk = np.reshape(np.asarray(img_mask_gen(out_img_path)), (224, 224, 1))
 

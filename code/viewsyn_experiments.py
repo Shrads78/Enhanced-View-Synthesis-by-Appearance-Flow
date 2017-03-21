@@ -4,6 +4,7 @@ import viewsyn_architecture as model
 import data_generators as d_gen
 import viewsyn_training as train_model
 from functools import partial
+import utility as util
 
 def load_test_data(path='../data/test/'):
 	#TODO:
@@ -49,6 +50,8 @@ def run_replication(test_images):
 	#build architecture of network
 	replication_net = model.build_replication_network()
 
+	#plot network
+	util.plot_architecture(replication_net, '../visualize_net/replication.png')
 	#data generator list
 	f_generate_list = d_gen.generate_data_dictionary
 	f_generate_data = d_gen.generate_data_replication
@@ -87,6 +90,6 @@ if __name__ == '__main__':
 	test_images = load_test_data()
 
 	# run_autoencoder(test_images)
-	run_transformed_autoencoder(test_images)
-	# run_replication(test_images)
+	#run_transformed_autoencoder(test_images)
+	run_replication(test_images)
 	# run_five_channel_network(test_images)

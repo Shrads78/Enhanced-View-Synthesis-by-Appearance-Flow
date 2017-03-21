@@ -14,9 +14,17 @@ def get_azimuth_transformation(in_path, out_path):
 	in_f = in_path.split('/')[-1]
 	out_f = out_path.split('/')[-1]
 
-	in_azimuth = int(in_f.split('_')[0]) / 20
-	out_azimuth = int(out_f.split('_')[0]) / 20
-	azimuth_bin = (in_azimuth - out_azimuth) % 19
+	in_azimuth = int(in_f.split('_')[0])
+	out_azimuth = int(out_f.split('_')[0])
+
+	angle_difference = out_azimuth - in_azimuth
+
+	if angle_difference < 0 and abs(angle_difference) > 180:
+		angle_difference += 360
+	elif angle_difference > 180:
+		angle_difference -= 360
+
+	azimuth_bin = angle_difference/20 + 9
 	
 	azimuth_onehot = np.zeros((1,19))
 	azimuth_onehot[0][azimuth_bin] = 1

@@ -63,7 +63,7 @@ def build_common_decoder(input_dim=4352):
 	#1 fully connected layers
 	model.add(Dense(4096, input_dim=input_dim, activation='relu')) #4096+256
 	#This layer is extra, keeping it here for backward compatibility
-	model.add(Dense(4096, activation='relu')) 
+	#model.add(Dense(4096, activation='relu')) 
 	
 	#reshape to 2D
 	model.add(Reshape((8, 8, 64)))
@@ -80,7 +80,7 @@ def build_common_decoder(input_dim=4352):
 def output_layer_decoder(model, n_channel):
 	
 	#output layer, add 3 RGB channels for reconstructed output view
-	model.add(Deconvolution2D(n_channel, 3, 3, (None, 225, 225, n_channel), border_mode='same', subsample = (1,1), activation = 'relu'))
+	model.add(Deconvolution2D(n_channel, 3, 3, (None, 225, 225, n_channel), border_mode='same', subsample = (1,1)))#, activation = 'relu'))
 
 	#add a resize layer to resize (225, 225) to (224, 224)
 	model.add(Reshape((225*225,n_channel)))

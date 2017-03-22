@@ -146,7 +146,7 @@ def generate_data_replication(data_dict, batch_size, first_output_name='bilinear
 			{first_output_name: np.asarray(out_imgb), 'sequential_4': np.asarray(mskb)})
 
 
-def generate_data_dictionary(dataPath='../data/train/'):
+def generate_data_dictionary(dataPath='../data/train/', fraction_train=0.8):
 	val_data_dict = {}
 	train_data_dict = {}
 
@@ -187,7 +187,7 @@ def generate_data_dictionary(dataPath='../data/train/'):
 					train_data_dict[i][e] = []
 
 					random.shuffle(d)
-					split_index = int(len(d)*0.8)
+					split_index = int(len(d)*fraction_train)
 					train_data_dict[i][e].extend(d[0:split_index])
 					val_data_dict[i][e].extend(d[split_index:])
 
@@ -198,7 +198,7 @@ def generate_data_dictionary(dataPath='../data/train/'):
 	#pdb.set_trace()
 	return train_data_dict, val_data_dict
 
-def generate_data_list(dataPath='../data/train/'):
+def generate_data_list(dataPath='../data/train/', fraction_train=0.8):
 	dataArr = []
 	for path,dirs,files in os.walk(dataPath):
 		#print path
@@ -224,4 +224,4 @@ def generate_data_list(dataPath='../data/train/'):
 	
 	np.random.shuffle(dataArr)
 
-	return dataArr[:int(math.ceil(.8*len(dataArr)))], dataArr[int(math.ceil(.8*len(dataArr))):]
+	return dataArr[:int(math.ceil(fraction_train*len(dataArr)))], dataArr[int(math.ceil(fraction_train*len(dataArr))):]

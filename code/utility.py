@@ -31,3 +31,16 @@ def plot_nested_architecture(network, folderpath):
 
 		name = layer.name
 		plot_architecture(network.get_layer(name), folderpath+name+'.png')
+
+def visualize_intermediate_outputs(model, layer_name, input_img):
+	imsave("input_image.png", np.squeeze(input_img))
+	
+	#intermediate layer 
+	intermediate_model = Model(input=model.input, output=model.get_layer(layer_name).output)
+	intermediate_output = intermediate_model.predict(input_img)
+	
+	intermediate_output = np.rollaxis(np.squeeze(first_conv_output), 2)
+	pdb.set_trace()
+	#save_all_activations(intermediate_output, 100, "../results/first_conv/")
+	
+	

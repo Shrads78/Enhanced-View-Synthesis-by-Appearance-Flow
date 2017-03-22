@@ -125,14 +125,14 @@ def test_replication_network():
 	replication_net = model.build_replication_network()
 	replication_net.load_weights(weights_path)
 
-	current_chair_folder = "../data/test/input/"
+	current_chair_folder = "../data/debug_input/"
 	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
-	pdb.set_trace()
+	# pdb.set_trace()
 	out = replication_net.predict([test_data, vpt_transformation])
 	
 	out[1] = np.reshape(out[1],(-1,224,224))
-	util.save_as_image("../data/test/trans_", out[0])
-	util.save_as_image("../data/test/mask_", out[1])
+	util.save_as_image("../data/debug_output/trans_", out[0])
+	util.save_as_image("../data/debug_output/", out[1])
 
 
 if __name__ == '__main__':

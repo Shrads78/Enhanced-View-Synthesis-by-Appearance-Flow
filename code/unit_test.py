@@ -5,6 +5,7 @@ from bilinear_layer import Bilinear
 from keras.callbacks import *
 import numpy as np
 import utility as util
+import data_generators as d_gen
 import h5py, pdb, os
 import viewsyn_architecture as model
 
@@ -14,12 +15,13 @@ def load_test_image_view(current_chair_folder):
 	vpt_array = np.zeros((19))
 	cur_idx = 0
 	for filename in os.listdir(current_chair_folder):
-		if filename == ".DS_Store": continue
+		if '.png' not in filename: continue
+		# Getting image
 		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
-		img.append(np.asarray(im))
-		
+		img.append(np.asarray(d_gen.subtract_mean(im)))
+		# Making a viewpoint transformation
 		tmp = vpt_array
-		tmp[2] = 1
+		tmp[cur_idx] = 1
 		vpt_transformation += [tmp]
 		cur_idx += 1
 		cur_idx %= 19
@@ -30,7 +32,7 @@ def load_data_bilinear(current_chair_folder):
 	img = []
 
 	for filename in os.listdir(current_chair_folder):
-		if filename == ".DS_Store": continue
+		if '.png' not in filename: continue
 		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
 		# pdb.set_trace()
 		x = np.zeros((224, 224,1))
@@ -117,10 +119,25 @@ def test_transformed_autoencoder():
 	out = t_autoencoder.predict([test_data, vpt_transformation])
 	util.save_as_image("../data/test/", out)
 
+def test_replication_network():
+	weights_path = '../model/weights.00-10.00.hdf5'
+	
+	replication_net = model.build_replication_network()
+	replication_net.load_weights(weights_path)
+
+	current_chair_folder = "../data/debug_input/"
+	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
+	pdb.set_trace()
+	out = replication_net.predict([test_data, vpt_transformation])
+	
+	out[1] = np.reshape(out[1],(-1,224,224))
+	util.save_as_image("../data/debug_output/trans_", out[0])
+	util.save_as_image("../data/debug_output/mask_", out[1])
+
 
 
 if __name__ == '__main__':
 	
-	test_bilinear_layer()
-
+	# test_bilinear_layer()
 	# test_transformed_autoencoder()
+	test_replication_network()

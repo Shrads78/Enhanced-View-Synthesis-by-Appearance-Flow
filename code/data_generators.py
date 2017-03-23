@@ -44,7 +44,8 @@ def generate_data_autoencoder(dataArr, batch_size):
 	while 1:
 		R = random.sample(range(len(dataArr)), batch_size)
 		input_images = []
-		output_images_masks = []
+		output_images_with_masks = []
+		mskb = []
 		
 		try:
 			for r in R:	
@@ -52,19 +53,25 @@ def generate_data_autoencoder(dataArr, batch_size):
 				currImgPath = fp
 				#print currImgPath
 				if '.png' in currImgPath:
-                    			img_mask = np.zeros((224,224,4))
 					img = np.asarray(Image.open(currImgPath).convert('RGB'), dtype=np.uint8)
-                    			img_mask[:,:,:-1] = img
-					msk = imgMaskGen(currImgPath)
-                    			img_mask[:,:,-1] = msk
+					msk = np.asarray(img_mask_gen(currImgPath))
+					
+					img_with_mask = np.zeros((224,224,4))
+					
+					img_with_mask[:,:,:-1] = img
+					img_with_mask[:,:,-1] = msk
+					
 					input_images.append(img)
-                    			output_images_masks.append(img_mask)
+					output_images_with_masks.append(img_with_mask)
+					mskb.append(np.reshape(msk, (224, 224, 1)))
 		except:
 			continue
 
 		input_images = np.asarray(input_images)
-		output_images_masks = np.asarray(output_images_masks)
-		yield {'image_input': input_images}, {'sequential_2': output_images_masks}
+		output_images_with_masks = np.asarray(output_images_with_masks)
+		mskb = np.asarray(mskb)
+
+		yield {'image_input': input_images}, {'sequential_2': output_images_with_masks}
 		
 
 
@@ -94,17 +101,19 @@ def generate_data_trans_autoencoder(data_dict, batch_size):
 
 			in_img = np.asarray(Image.open(in_img_path).convert('RGB'), dtype=np.uint8)
 			out_img = np.asarray(Image.open(out_img_path).convert('RGB'), dtype=np.uint8)
-            		#sending output as 4 channels with 4thchannel as masked output 
+			#sending output as 4 channels with 4thchannel as masked output 
 			out_data = np.zeros((224,224,4))
-            		out_data[:,:,:-1] = out_img
+			out_data[:,:,:-1] = out_img
 			
 			#subtract mean
-            		#in_img = subtract_mean(in_img)
-            		#out_img = subtract_mean(out_img)
+			#in_img = subtract_mean(in_img)
+			#out_img = subtract_mean(out_img)
 
-			msk = np.reshape(np.asarray(img_mask_gen(out_img_path)), (224, 224))
-            		out_data[:,:,3] = msk
+			msk = np.asarray(img_mask_gen(out_img_path))
+			out_data[:,:,3] = msk
 
+			msk = np.reshape(msk, (224, 224, 1))
+			
 			in_imgb.append(in_img)
 			out_imgb.append(out_data)
 			mskb.append(msk)
@@ -139,17 +148,19 @@ def generate_data_replication(data_dict, batch_size, first_output_name='bilinear
 
 			in_img = np.asarray(Image.open(in_img_path).convert('RGB'), dtype=np.uint8)
 			out_img = np.asarray(Image.open(out_img_path).convert('RGB'), dtype=np.uint8)
-            		#sending output as 4 channels with 4thchannel as masked output 
+			#sending output as 4 channels with 4thchannel as masked output 
 			out_data = np.zeros((224,224,4))
-            		out_data[:,:,:-1] = out_img
+			out_data[:,:,:-1] = out_img
 			
 			#subtract mean
-            		#in_img = subtract_mean(in_img)
-            		#out_img = subtract_mean(out_img)
-			
-			msk = np.reshape(np.asarray(img_mask_gen(out_img_path)), (224, 224))
-            		out_data[:,:,-1] = msk
+			#in_img = subtract_mean(in_img)
+			#out_img = subtract_mean(out_img)
+	
+			msk = np.asarray(img_mask_gen(out_img_path))
+			out_data[:,:,-1] = msk
 
+			msk = np.reshape(msk, (224, 224, 1))
+			
 			in_imgb.append(in_img)
 			out_imgb.append(out_data)
 			mskb.append(msk)

@@ -2,9 +2,11 @@ from scipy.misc import imsave
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from keras.utils import visualize_util
+from keras.preprocessing import image
 from keras.layers import *
 from bilinear_layer import Bilinear
-import pdb
+import data_generators as d_gen
+import pdb, os
 
 def save_as_image(filepath, images):
 	for i in range(0, len(images)):
@@ -32,15 +34,40 @@ def plot_nested_architecture(network, folderpath):
 		name = layer.name
 		plot_architecture(network.get_layer(name), folderpath+name+'.png')
 
-def visualize_intermediate_outputs(model, layer_name, input_img):
-	imsave("input_image.png", np.squeeze(input_img))
-	
-	#intermediate layer 
-	intermediate_model = Model(input=model.input, output=model.get_layer(layer_name).output)
-	intermediate_output = intermediate_model.predict(input_img)
-	
-	intermediate_output = np.rollaxis(np.squeeze(first_conv_output), 2)
-	pdb.set_trace()
-	#save_all_activations(intermediate_output, 100, "../results/first_conv/")
-	
-	
+def load_test_image_view(current_chair_folder):
+	img = []
+	vpt_transformation = []
+	vpt_array = np.zeros((19))
+	cur_idx = 0
+	for filename in os.listdir(current_chair_folder):
+		if '.png' not in filename: continue
+		# Getting image
+		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
+		img.append(np.asarray(d_gen.subtract_mean(im)))
+		# Making a viewpoint transformation
+		tmp = vpt_array
+		tmp[cur_idx] = 1
+		vpt_transformation += [tmp]
+		cur_idx += 1
+		cur_idx %= 19
+
+	return np.array(img), np.array(vpt_transformation)
+
+def load_data_bilinear(current_chair_folder):
+	img = []
+
+	for filename in os.listdir(current_chair_folder):
+		if '.png' not in filename: continue
+		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
+		# pdb.set_trace()
+		x = np.zeros((224, 224,1))
+		y = np.zeros((224, 224,1))
+		for i in range(224):
+			for j in range(224):
+				x[i][j][0] = j * 1.2
+				y[i][j][0] = i * 1.2
+
+		im = np.concatenate((im, y, x), axis = 2)
+		img.append(np.asarray(im))
+		
+	return np.array(img)

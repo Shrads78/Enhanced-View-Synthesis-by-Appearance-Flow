@@ -6,7 +6,21 @@ from keras.optimizers import *
 from bilinear_layer import Bilinear
 import utility as util
 import pdb
+from keras import backend as K
+import tensorflow as tf
 
+def maskedl1loss(y_true, y_pred):
+    gt_mask = y_true[:,:,:,3]
+    batch_size = tf.shape(y_pred)[0]
+    width = tf.shape(y_pred)[1]
+    height = tf.shape(y_pred)[2]
+    depth = tf.shape(y_pred)[3]
+    zero_mask = tf.zeros([batch_size, height, width, depth], tf.int32)
+    masked_pred = tf.select(gt_mask, y_pred, zero_mask)
+    masked_gt = tf.select(gt_mask, y_true, zero_mask)
+    loss = tf.losses.absolute_differences(masked_pred,masked_gt)
+    loss /= K.sum(gt_mask)
+    return loss
 
 def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 = 0.999, mom = 0.5, rh = 0.9):
 	eps = 1e-8
@@ -122,7 +136,7 @@ def build_five_channel_network():
 
 	opt = get_optimizer('adam')
 	encoder_decoder.compile(optimizer=opt, metrics=['accuracy'],
-		loss={'sequential_2': 'mean_squared_error', 'sequential_4': 'binary_crossentropy'},
+		loss={'sequential_2': maskedl1loss, 'sequential_4': 'binary_crossentropy'},
               loss_weights={'sequential_2': 1.0, 'sequential_4': 0.1})
 
 	print encoder_decoder.summary()
@@ -159,7 +173,7 @@ def build_replication_network():
 
 	opt = get_optimizer('adam')
 	encoder_decoder.compile(optimizer=opt, metrics=['accuracy'],
-		loss={'bilinear_1': 'mean_absolute_error', 'sequential_4': 'binary_crossentropy'},
+		loss={'bilinear_1': maskedl1loss, 'sequential_4': 'binary_crossentropy'},
               loss_weights={'bilinear_1': 1.0, 'sequential_4': 0.1})
 
 	print encoder_decoder.summary()
@@ -186,7 +200,7 @@ def build_transformed_autoencoder():
 	transformed_autoencoder = Model(input=[image_input, view_input], output=main_output)
 	#compile model
 	opt = get_optimizer('adam')
-	transformed_autoencoder.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
+	transformed_autoencoder.compile(optimizer=opt, metrics=['accuracy'], loss=maskedl1loss)
 
 	print transformed_autoencoder.summary()
 	return transformed_autoencoder
@@ -204,7 +218,7 @@ def build_autoencoder():
 	autoencoder = Model(input=image_input, output=main_output)
 	#compile model
 	opt = get_optimizer('adam')
-	autoencoder.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
+	autoencoder.compile(optimizer=opt, metrics=['accuracy'], loss=maskedl1loss)
 
 	print autoencoder.summary()
 	return autoencoder

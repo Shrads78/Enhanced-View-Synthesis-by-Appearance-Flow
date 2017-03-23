@@ -8,6 +8,7 @@ import utility as util
 import pdb
 from keras import backend as K
 from masked_loss import *
+from multi_gpu impot *
 
 def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 = 0.999, mom = 0.5, rh = 0.9):
 	eps = 1e-8
@@ -157,6 +158,8 @@ def build_replication_network():
 
 	
 	encoder_decoder = Model(input=[image_input, view_input], output=[bilinear_out, mask_output])
+
+	encoder_decoder = make_parallel(encoder_decoder, 8) #as we have 8 gpus
 
 	opt = get_optimizer('adam')
 	encoder_decoder.compile(optimizer=opt, metrics=['accuracy'],

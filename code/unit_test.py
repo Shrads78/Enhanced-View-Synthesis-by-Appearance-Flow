@@ -83,7 +83,7 @@ def test_transformed_autoencoder():
 	util.save_as_image("../data/test/", out)
 
 def test_replication_network():
-	weights_path = '../model/weights.00-10.00.hdf5'
+	weights_path = '../model/weights.04-8.03.hdf5'
 	
 	replication_net = model.build_replication_network()
 	replication_net.load_weights(weights_path)
@@ -97,28 +97,7 @@ def test_replication_network():
 	util.save_as_image("../data/debug_output/trans_", out[0])
 	util.save_as_image("../data/debug_output/", out[1])
 
-def visualize_output_replication_network(f_network, layer_name, weights_path, input_images):
-	
-	net = f_network()
-	net.load_weights(weights_path)
-
-	current_chair_folder = "../data/debug_input/"
-	test_data, vpt_transformation = util.load_test_image_view(current_chair_folder)
-	# pdb.set_trace()
-	intermediate_model = Model(input=net.input, output=net.get_layer('sequential_1').get_layer('convolution2d_6').output)
-	intermediate_output = intermediate_model.predict([test_data, vpt_transformation])
-	pdb.set_trace()
-	intermediate_output = np.rollaxis(np.squeeze(intermediate_output), 2)
-	out[1] = np.reshape(out[1],(-1,224,224))
-	util.save_as_image("../data/debug_output/trans_", out[0])
-	util.save_as_image("../data/debug_output/", out[1])
-
-# def visualize_transformed_autoencoder(f_network, layer_name, weights_path, input_images):
-
-# def visualize_autoencoder(f_network, layer_name, weights_path, input_images):
-
-
 if __name__ == '__main__':
 	# test_bilinear_layer()
 	# test_transformed_autoencoder()
-	# test_replication_network()
+	test_replication_network()

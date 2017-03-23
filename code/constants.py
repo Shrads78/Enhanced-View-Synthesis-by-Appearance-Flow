@@ -1,2 +1,2 @@
-batch_size = 4
-samples_per_epoch = 16
+batch_size = 128
+samples_per_epoch = 256000

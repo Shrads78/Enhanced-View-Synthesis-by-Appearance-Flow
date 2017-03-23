@@ -8,7 +8,7 @@ def train_network(network, f_generate_list, f_generate_data):
 	# since the model has 2 inputs and 2 outputs
 	#Callbacks
 	hist = History()
-	checkpoint = ModelCheckpoint('../model/weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='auto', period=5)
+	checkpoint = ModelCheckpoint('../model/weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='auto', period=1)
 	callbacks_list = [hist, checkpoint]
 
 	

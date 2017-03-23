@@ -192,6 +192,39 @@ def build_transformed_autoencoder():
 	print transformed_autoencoder.summary()
 	return transformed_autoencoder
 
+def build_transformed_autoencoder_maskstream():
+	image_input = Input(shape=(224, 224, 3,), name='image_input')
+	view_input = Input(shape=(19,), name='view_input')
+
+	image_encoder = build_image_encoder()
+	view_encoder = build_viewpoint_encoder()
+
+	decoder = build_common_decoder()
+	decoder = output_layer_decoder(decoder, 3) #transoformed autoencoder
+	
+	mask_decoder = build_common_decoder()
+	mask_decoder = output_layer_decoder(mask_decoder, 1)
+
+	image_output = image_encoder(image_input)
+	view_output = view_encoder(view_input)
+
+	image_view_out = merge([image_output, view_output], mode='concat', concat_axis=1)
+	
+	main_output = decoder(image_view_out)
+
+	mask_output = mask_decoder(image_view_out)
+
+	transformed_autoencoder = Model(input=[image_input, view_input], output=[main_output, mask_output])
+	#pdb.set_trace()
+	#compile model
+	opt = get_optimizer('adam')
+	transformed_autoencoder.compile(optimizer=opt, metrics=['accuracy'],
+				loss={'sequential_3': maskedl1loss, 'sequential_4': 'binary_crossentropy'},
+              			loss_weights={'sequential_3': 1.0, 'sequential_4': 0.1})
+
+	print transformed_autoencoder.summary()
+	return transformed_autoencoder
+
 def build_autoencoder():
 	autoencoder = Sequential()
 

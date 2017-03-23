@@ -48,6 +48,26 @@ def run_transformed_autoencoder():
 	
 	print "test_loss=", test_loss, ", test_accuracy=", test_accuracy
 
+def run_transformed_autoencoder_maskstream():
+	#build architecture of network
+	t_autoencoder = model.build_transformed_autoencoder_maskstream()
+
+	#data generator list
+	f_generate_list = d_gen.generate_data_dictionary
+	f_generate_data = partial(d_gen.generate_data_replication, first_output_name='sequential_3')
+	
+	#train transformed autoencoder
+	try:
+		hist = train_model.train_network(t_autoencoder, f_generate_list, f_generate_data)
+	finally:
+		t_autoencoder.save('../model/weights-interrupt-t_autoencoder.hdf5')
+
+
+	#test transformed autoencoder
+	test_loss, test_accuracy = test_model.evaluate_network(t_autoencoder, f_generate_list, f_generate_data)
+	
+	print "test_loss=", test_loss, ", test_accuracy=", test_accuracy
+
 	
 def run_replication():
 	#build architecture of network
@@ -99,6 +119,7 @@ def run_five_channel_network():
 if __name__ == '__main__':
 	
 	# run_autoencoder()
-	run_transformed_autoencoder()
+	#run_transformed_autoencoder()
+	run_transformed_autoencoder_maskstream()
 	# run_replication()
 	# run_five_channel_network()

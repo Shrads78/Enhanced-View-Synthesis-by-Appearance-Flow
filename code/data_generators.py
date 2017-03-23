@@ -3,7 +3,7 @@ from PIL import Image
 import os
 import pdb
 import shutil 
-import random
+from numpy import random
 import math
 
 def img_mask_gen(imgpath):
@@ -79,8 +79,8 @@ def generate_data_trans_autoencoder(data_dict, batch_size):
 			elevations = data_dict[rand_model].keys()
 			rand_elev = random.choice(elevations)
 
-			in_img_path, out_img_path = random.sample(data_dict[rand_model][rand_elev], 2)
-			
+			in_img_path, out_img_path = random.choice(data_dict[rand_model][rand_elev], 2)
+			#print in_img_path, out_img_path
 			view_transformation = get_azimuth_transformation(in_img_path, out_img_path)
 
 			if np.argmax(view_transformation) > 9:
@@ -123,7 +123,7 @@ def generate_data_replication(data_dict, batch_size, first_output_name='bilinear
 			elevations = data_dict[rand_model].keys()
 			rand_elev = random.choice(elevations)
 
-			in_img_path, out_img_path = random.sample(data_dict[rand_model][rand_elev], 2)
+			in_img_path, out_img_path = random.choice(data_dict[rand_model][rand_elev], 2)
 			
 			view_transformation = get_azimuth_transformation(in_img_path, out_img_path)
 

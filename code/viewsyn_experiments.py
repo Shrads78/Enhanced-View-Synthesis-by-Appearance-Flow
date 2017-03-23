@@ -36,7 +36,7 @@ def run_transformed_autoencoder():
 	f_generate_list = d_gen.generate_data_dictionary
 	f_generate_data = d_gen.generate_data_trans_autoencoder
 	
-	train transformed autoencoder
+	#train transformed autoencoder
 	try:
 		hist = train_model.train_network(t_autoencoder, f_generate_list, f_generate_data)
 	finally:

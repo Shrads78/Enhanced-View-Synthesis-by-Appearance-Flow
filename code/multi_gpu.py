@@ -43,4 +43,4 @@ def make_parallel(model, gpu_count):
         for outputs in outputs_all:
             merged.append(merge(outputs, mode='concat', concat_axis=0))
             
-return Model(input=model.inputs, output=merged)
+        return Model(input=model.inputs, output=merged)

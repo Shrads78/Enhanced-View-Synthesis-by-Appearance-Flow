@@ -8,7 +8,7 @@ import utility as util
 import pdb
 from keras import backend as K
 from masked_loss import *
-from multi_gpu impot *
+from multi_gpu import *
 
 def get_optimizer(name = 'adagrad', l_rate = 0.0001, dec = 0.0, b_1 = 0.9, b_2 = 0.999, mom = 0.5, rh = 0.9):
 	eps = 1e-8

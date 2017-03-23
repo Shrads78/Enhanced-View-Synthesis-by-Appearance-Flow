@@ -192,19 +192,56 @@ def build_transformed_autoencoder():
 	return transformed_autoencoder
 
 def build_autoencoder():
-	image_input = Input(shape=(224, 224, 3,), name='image_input')
-	image_encoder = build_image_encoder()
+	autoencoder = Sequential()
+
+	#6 convolution layers
+	autoencoder.add(Convolution2D(16, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu',
+			input_shape=(224, 224, 3)))
+	autoencoder.add(Convolution2D(32, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Convolution2D(64, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Convolution2D(128, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Convolution2D(256, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Convolution2D(512, 3, 3, border_mode='same', subsample = (2,2), activation = 'relu'))
+
+	#Flatten 
+	autoencoder.add(Flatten())
+
+	#2 fully connected layers
+	autoencoder.add(Dense(4096, activation='relu'))
+	autoencoder.add(Dropout(p=0))
+	autoencoder.add(Dense(4096, activation='relu'))
+	autoencoder.add(Dropout(p=0))
+
 	
-	decoder = build_common_decoder(input_dim=4096)
-	decoder = output_layer_decoder(decoder, 3) #autoencoder
+	#define network architecture for decoder
+	
+	#2 fully connected layers
+	autoencoder.add(Dense(4096, activation='relu'))
+	autoencoder.add(Dense(4096, activation='relu'))
+	
+	#reshape to 2D
+	autoencoder.add(Reshape((8, 8, 64)))
+	
+	#5 upconv layers
+	autoencoder.add(Deconvolution2D(256, 3, 3, (None, 15, 15,256), border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Deconvolution2D(128, 3, 3, (None, 29, 29, 128), border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Deconvolution2D(64, 3, 3, (None, 57, 57, 64), border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Deconvolution2D(32, 3, 3, (None, 113, 113, 32),border_mode='same', subsample = (2,2), activation = 'relu'))
+	autoencoder.add(Deconvolution2D(16, 3, 3, (None, 225, 225, 16), border_mode='same', subsample = (2,2), activation = 'relu'))
+	
+	#output layer, add 3 RGB channels for reconstructed output view
+	autoencoder.add(Deconvolution2D(3, 3, 3, (None, 225, 225, 3), border_mode='same', subsample = (1,1), activation = 'relu'))
 
-	image_output = image_encoder(image_input)
-	main_output = decoder(image_output)
+	#add a resize layer to resize (225, 225) to (224, 224)
+	autoencoder.add(Reshape((225*225,3)))
+	autoencoder.add(Lambda(lambda x: x[:,:50176,])) # throw away some
+	autoencoder.add(Reshape((224,224,3)))
 
-	autoencoder = Model(input=image_input, output=main_output)
-	#compile model
+	#compile autoencoder
 	opt = get_optimizer('adam')
 	autoencoder.compile(optimizer=opt, metrics=['accuracy'], loss='mean_squared_error')
 
+
 	print autoencoder.summary()
 	return autoencoder
+	

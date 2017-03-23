@@ -1,6 +1,7 @@
 from keras.preprocessing import image
 from keras.models import Sequential, Model
 from keras.layers import *
+from keras import backend as K
 from bilinear_layer import Bilinear
 from keras.callbacks import *
 import numpy as np
@@ -8,44 +9,6 @@ import utility as util
 import data_generators as d_gen
 import h5py, pdb, os
 import viewsyn_architecture as model
-
-def load_test_image_view(current_chair_folder):
-	img = []
-	vpt_transformation = []
-	vpt_array = np.zeros((19))
-	cur_idx = 0
-	for filename in os.listdir(current_chair_folder):
-		if '.png' not in filename: continue
-		# Getting image
-		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
-		img.append(np.asarray(d_gen.subtract_mean(im)))
-		# Making a viewpoint transformation
-		tmp = vpt_array
-		tmp[cur_idx] = 1
-		vpt_transformation += [tmp]
-		cur_idx += 1
-		cur_idx %= 19
-
-	return np.array(img), np.array(vpt_transformation)
-
-def load_data_bilinear(current_chair_folder):
-	img = []
-
-	for filename in os.listdir(current_chair_folder):
-		if '.png' not in filename: continue
-		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
-		# pdb.set_trace()
-		x = np.zeros((224, 224,1))
-		y = np.zeros((224, 224,1))
-		for i in range(224):
-			for j in range(224):
-				x[i][j][0] = j * 1.2
-				y[i][j][0] = i * 1.2
-
-		im = np.concatenate((im, y, x), axis = 2)
-		img.append(np.asarray(im))
-		
-	return np.array(img)
 
 def test_load_weights():
 	weights_path = '../model/weights.29-0.95.hdf5'
@@ -99,7 +62,7 @@ def test_bilinear_layer():
 	print model.summary()
 
 	current_chair_folder = "../data/debug_input/"
-	test_data = load_data_bilinear(current_chair_folder)
+	test_data = util.load_data_bilinear(current_chair_folder)
 	model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['accuracy'])
 	model.fit(test_data, test_data[:,:,:,:-2], batch_size=1, nb_epoch=10, verbose=1, callbacks = [tensor_callback])
 	
@@ -114,7 +77,7 @@ def test_transformed_autoencoder():
 	t_autoencoder.load_weights(weights_path)
 
 	current_chair_folder = "../data/test/input/"
-	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
+	test_data, vpt_transformation = util.load_test_image_view(current_chair_folder)
 	# pdb.set_trace()
 	out = t_autoencoder.predict([test_data, vpt_transformation])
 	util.save_as_image("../data/test/", out)
@@ -126,7 +89,7 @@ def test_replication_network():
 	replication_net.load_weights(weights_path)
 
 	current_chair_folder = "../data/debug_input/"
-	test_data, vpt_transformation = load_test_image_view(current_chair_folder)
+	test_data, vpt_transformation = util.load_test_image_view(current_chair_folder)
 	# pdb.set_trace()
 	out = replication_net.predict([test_data, vpt_transformation])
 	
@@ -134,9 +97,28 @@ def test_replication_network():
 	util.save_as_image("../data/debug_output/trans_", out[0])
 	util.save_as_image("../data/debug_output/", out[1])
 
+def visualize_output_replication_network(f_network, layer_name, weights_path, input_images):
+	
+	net = f_network()
+	net.load_weights(weights_path)
+
+	current_chair_folder = "../data/debug_input/"
+	test_data, vpt_transformation = util.load_test_image_view(current_chair_folder)
+	# pdb.set_trace()
+	intermediate_model = Model(input=net.input, output=net.get_layer('sequential_1').get_layer('convolution2d_6').output)
+	intermediate_output = intermediate_model.predict([test_data, vpt_transformation])
+	pdb.set_trace()
+	intermediate_output = np.rollaxis(np.squeeze(intermediate_output), 2)
+	out[1] = np.reshape(out[1],(-1,224,224))
+	util.save_as_image("../data/debug_output/trans_", out[0])
+	util.save_as_image("../data/debug_output/", out[1])
+
+# def visualize_transformed_autoencoder(f_network, layer_name, weights_path, input_images):
+
+# def visualize_autoencoder(f_network, layer_name, weights_path, input_images):
+
 
 if __name__ == '__main__':
-	
 	# test_bilinear_layer()
 	# test_transformed_autoencoder()
-	test_replication_network()
+	# test_replication_network()

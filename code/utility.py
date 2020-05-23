@@ -1,14 +1,14 @@
 from scipy.misc import imsave
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import numpy as np
-import Image
-import os
-import pdb
-import shutil 
-import random
+from keras.utils import visualize_util
+from keras.preprocessing import image
+from keras.layers import *
+from bilinear_layer import Bilinear
+import data_generators as d_gen
+import pdb, os
 
-def save_as_image(images):
+def save_as_image(filepath, images):
 	for i in range(0, len(images)):
 		filename = filepath+str(i)+".png"
 		imsave(filename, images[i])
@@ -17,47 +17,57 @@ def show_image(image):
 	plt.imshow(np.squeeze(image))
 	plt.show()
 
-def img_mask_gen(imgpath):
-	im = Image.open(imgpath).convert('L').point(lambda x: 0 if x<=0 or x>=250 else 255,'1')
-	return im	
 
-def generate_autoencoder_data_from_list(dataArr):
-	while 1:
-		r = random.sample(range(len(dataArr)), 1)
-		fp = dataArr[r]	
-		currImgPath = fp[0]
-		img = np.asarray(Image.open(currImgPath).convert('RGB'), dtype=np.uint8)
-		#msk = imgMaskGen(currImgPath)
-		img4 = []
-		img4.append(img)
-		img4 = np.asarray(img4)
-		yield ({'convolution2d_input_1': img4}, {'reshape_3': img4})
-		#yield (img,img)
+def plot_architecture(network, filepath):
+	visualize_util.plot(network, to_file=filepath)
 
-def generate_data_array_for_autoencoder(dataPath='../data/chairs/'):
-	dataArr = []
-	for path,dirs,files in os.walk(dataPath):
-		#print path
-		for dr in dirs:
-			#print dr
-			if dr!='model_views' and dr != '':
-				drPath = path+'/'+dr
-				if '//' not in drPath:
-					#print drPath
-					shutil.rmtree(drPath)
-			#pruning complete
-			elif dr =='model_views':
-				inpath = os.path.join(dataPath,path[len(dataPath):]) + '/'+dr
-				for files in os.walk(inpath):
-					for fList in files:					
-						for f in fList:
-							if '.png' in f:
-								readLoc = inpath + '/'+f
-								#print readLoc
-								dataArr.append(readLoc)
+def plot_nested_architecture(network, folderpath):
+	#first plot full network
+	plot_architecture(network, folderpath+'full.png')
 
-	dataArr = np.asarray(dataArr)
 	#pdb.set_trace()
-	np.random.shuffle(dataArr)
-	return dataArr
+	#now plot all layers
+	for layer in network.layers:
+		if type(layer) is InputLayer or type(layer) is Merge or type(layer) is Bilinear:
+			continue
 
+		name = layer.name
+		plot_architecture(network.get_layer(name), folderpath+name+'.png')
+
+def load_test_image_view(current_chair_folder):
+	img = []
+	vpt_transformation = []
+	vpt_array = np.zeros((19))
+	cur_idx = 0
+	for filename in os.listdir(current_chair_folder):
+		if '.png' not in filename: continue
+		# Getting image
+		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
+		img.append(np.asarray(d_gen.subtract_mean(im)))
+		# Making a viewpoint transformation
+		tmp = vpt_array
+		tmp[cur_idx] = 1
+		vpt_transformation += [tmp]
+		cur_idx += 1
+		cur_idx %= 19
+
+	return np.array(img), np.array(vpt_transformation)
+
+def load_data_bilinear(current_chair_folder):
+	img = []
+
+	for filename in os.listdir(current_chair_folder):
+		if '.png' not in filename: continue
+		im = image.img_to_array(image.load_img((current_chair_folder + filename)))
+		# pdb.set_trace()
+		x = np.zeros((224, 224,1))
+		y = np.zeros((224, 224,1))
+		for i in range(224):
+			for j in range(224):
+				x[i][j][0] = j * 1.2
+				y[i][j][0] = i * 1.2
+
+		im = np.concatenate((im, y, x), axis = 2)
+		img.append(np.asarray(im))
+		
+	return np.array(img)

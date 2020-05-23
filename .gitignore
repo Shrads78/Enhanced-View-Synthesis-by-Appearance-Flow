@@ -1,7 +1,9 @@
 *.pyc
 .DS_Store
-*.png
-*.jpg
 *.zip
-/data/*
+*.gz
+./data/*
 *.swp
+*.out
+*.pem
+*.hdf5
